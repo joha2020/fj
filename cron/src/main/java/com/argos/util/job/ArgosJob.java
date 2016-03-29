@@ -12,6 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -22,21 +23,57 @@ import com.argos.util.vo.Response;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+@DisallowConcurrentExecution
 public class ArgosJob implements Job {
 
 	@Override
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		try {
-			if(this.getFirstSet())				
-				if(this.getSecondSet())
-					if(this.getThirdSet())
-						this.getFourthSet();
+			Properties prop = new Properties();
+			InputStream input = new FileInputStream("config.properties");
+			prop.load(input);
+			if(this.getFirstSet())	{
+				System.out.println("Done with 1");
+				if(this.getSecondSet()){
+					System.out.println("Done with 2");
+					if(this.getThirdSet()){
+						System.out.println("Done with 3");
+						if(this.getFourthSet())
+						{	
+							System.out.println("Done with 4");
+							if(Util.renameTempFile(prop.getProperty("filepath"))){
+								System.out.println("Job Done !!!");
+								
+							}
+						}
+						else{
+							
+							System.out.println("Leaving Job due to failure in 4");
+							Util.deleteTempFile(prop.getProperty("filepath"));
+						}
+					}
+					else{
+						System.out.println("Leaving Job due to failure in 3");
+						Util.deleteTempFile(prop.getProperty("filepath"));
+					}
+				}
+				else{
+					System.out.println("Leaving Job due to failure in 2");
+					Util.deleteTempFile(prop.getProperty("filepath"));
+					
+				}
+			}
+			else
+			{
+				System.out.println("Leaving Job due to failure in 1");
+				Util.deleteTempFile(prop.getProperty("filepath"));
+			}
 			
-			System.out.println("Job Done !!!");
+			
 		}
 
 		catch (Exception e) {
-			System.out.println("Error>>" + e);
+			System.out.println("Leaving the Execute due to  " + e);
 		}
 
 	}
@@ -70,11 +107,12 @@ public class ArgosJob implements Job {
 			Response resp = gson.fromJson(br, Response.class);
 			if(resp.getId() != null)
 			{
-				
+				System.out.println("request1");
 				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),true);
+				return true;
 			}
 			
-			return true;
+			return false;
 			
 		}
 		
@@ -92,7 +130,7 @@ public class ArgosJob implements Job {
 			Properties prop = new Properties();
 			InputStream input = new FileInputStream("config.properties");
 			prop.load(input);
-			String endPoint = "https://api.netbiter.net/operation/v1/rest/json/system/003011FAD084/live/async?accesskey=31E7ECB9D88D78C25BEB2987CAB2BF53&id=51968.0.103690&id=51968.0.103692&id=51968.0.103693&id=51968.0.103696&id=51968.0.103688&id=51968.0.103689&id=51968.0.103694&id=51968.0.103697&id=51968.0.103695&id=51968.0.103700&id=51968.0.103701&id=51968.0.103702&id=51968.0.103705&id=51968.0.103698&id=51968.0.103699&id=51968.0.103701&id=51968.0.103703&id=51968.0.103706&id=51968.0.103704&id=51968.0.103709&id=51968.0.103710&id=51968.0.103711&id=51968.0.103714&id=51968.0.103707&id=51968.0.103708&id=51968.0.103712&id=51968.0.103715&id=51968.0.103713&id=51968.0.103718&id=51968.0.103719&id=51968.0.103720&id=51968.0.103723&id=51968.0.103716&id=51968.0.103717&id=51968.0.103721&id=51968.0.103724&id=51968.0.103722";
+			String endPoint = "https://api.netbiter.net/operation/v1/rest/json/system/003011FAD084/live/async?accesskey=31E7ECB9D88D78C25BEB2987CAB2BF53&id=51968.0.103690&id=51968.0.103692&id=51968.0.103693&id=51968.0.103696&id=51968.0.103688&id=51968.0.103689&id=51968.0.103694&id=51968.0.103697&id=51968.0.103695&id=51968.0.103700&id=51968.0.103701&id=51968.0.103702&id=51968.0.103705&id=51968.0.103698&id=51968.0.103699&id=51968.0.103703&id=51968.0.103706&id=51968.0.103704&id=51968.0.103709&id=51968.0.103710&id=51968.0.103711&id=51968.0.103714&id=51968.0.103707&id=51968.0.103708&id=51968.0.103712&id=51968.0.103715&id=51968.0.103713&id=51968.0.103718&id=51968.0.103719&id=51968.0.103720&id=51968.0.103723&id=51968.0.103716&id=51968.0.103717&id=51968.0.103721&id=51968.0.103724&id=51968.0.103722";
 			requestBuilder = requestBuilder.setConnectTimeout(20000);
 			requestBuilder = requestBuilder.setConnectionRequestTimeout(20000);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -114,11 +152,12 @@ public class ArgosJob implements Job {
 			Response resp = gson.fromJson(br, Response.class);
 			if(resp.getId() != null)
 			{
-				//Thread.sleep(2*resp.getEstimatedWaitTime());
+				System.out.println("request2");
 				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false);
+				return true;
 			}
 			
-			return true;
+			return false;
 			
 		}
 		
@@ -158,11 +197,12 @@ public class ArgosJob implements Job {
 			Response resp = gson.fromJson(br, Response.class);
 			if(resp.getId() != null)
 			{
-				//Thread.sleep(2*resp.getEstimatedWaitTime());
+				System.out.println("request3");
 				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false);
+				return true;
 			}
 			
-			return true;
+			return false;
 			
 		}
 		
@@ -202,11 +242,14 @@ public class ArgosJob implements Job {
 			Response resp = gson.fromJson(br, Response.class);
 			if(resp.getId() != null)
 			{
-				
+				System.out.println("request4");
 				this.getData(resp.getId(),true,resp.getEstimatedWaitTime(),false);
+				return true;
 			}
 			
-			return true;
+			return false;
+			
+			
 			
 		}
 		

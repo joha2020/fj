@@ -1,10 +1,14 @@
 package com.argos.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 
 import com.argos.util.vo.Param;
 
@@ -12,20 +16,26 @@ public class Util {
 
 	public static void writeToCSV(List<Param> params, String path, Boolean end,Boolean start) {
 		try {
-			SimpleDateFormat fmt = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aaa");
-			String date = fmt.format(new Date());
-			File file = new File(path);
+			SimpleDateFormat fmt = new SimpleDateFormat("dd-MM-yyyy");
+			SimpleDateFormat timefmt = new SimpleDateFormat("HH:mm:00");
+			Date now = new Date();
+			String date = fmt.format(now);
+			String timeNow = timefmt.format(now);
+			String tempFilePath  = path+"-temp.csv";
+			File file = new File(tempFilePath);
 
 			if (!file.exists()) {
 				file.createNewFile();
 			}
 
-			FileWriter writer = new FileWriter(path, true);
+			FileWriter writer = new FileWriter(tempFilePath, true);
 			
 			if(start)
 			{
+				writer.append('\n');
 				writer.append(date);
 				writer.append(',');
+				writer.append(timeNow);
 				
 			}
 
@@ -41,7 +51,7 @@ public class Util {
 				{
 					if(end)
 					{
-						writer.append('\n');
+						
 						
 					}
 					else
@@ -49,10 +59,7 @@ public class Util {
 						writer.append(',');
 					}
 				}
-//				writer.append(teams.get(i).getTitle());
-//				writer.append(',');
-//				writer.append(teams.get(i).getKey());
-//				writer.append('\n');
+
 			}
 
 			writer.flush();
@@ -62,6 +69,48 @@ public class Util {
 
 		catch (Exception e) {
 			System.out.println("Error>>" + e);
+		}
+	}
+	
+	public static boolean renameTempFile(String path){
+		try{
+			
+			File oldfile =new File(path+"-temp.csv");
+			FileWriter writer = new FileWriter(path+".csv", true);
+			String sCurrentLine;
+			BufferedReader br = new BufferedReader(new FileReader(oldfile));
+			writer.append("\n");
+			while ((sCurrentLine = br.readLine()) != null) {
+				writer.append(sCurrentLine);			
+				
+			}
+			if (br != null)br.close();
+			writer.flush();
+			writer.close();
+			if(oldfile.exists())
+				FileUtils.forceDelete(oldfile);
+			return true;
+			
+		}
+		catch(Exception e){			
+			System.out.println("Error renaming the file"+e);
+			return false;
+		}
+		
+	}
+	
+	public static boolean deleteTempFile(String path)
+	{
+		try{
+			File oldfile =new File(path+"-temp.csv");
+			if(oldfile.exists())
+				FileUtils.forceDelete(oldfile);
+			
+			return true;
+			
+		}
+		catch(Exception e){
+			return false;
 		}
 	}
 
