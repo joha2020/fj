@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -32,13 +33,14 @@ public class ArgosJob implements Job {
 			Properties prop = new Properties();
 			InputStream input = new FileInputStream("config.properties");
 			prop.load(input);
-			if(this.getFirstSet())	{
+			Date startTime = new Date();
+			if(this.getFirstSet(startTime))	{
 				System.out.println("Done with 1");
-				if(this.getSecondSet()){
+				if(this.getSecondSet(startTime)){
 					System.out.println("Done with 2");
-					if(this.getThirdSet()){
+					if(this.getThirdSet(startTime)){
 						System.out.println("Done with 3");
-						if(this.getFourthSet())
+						if(this.getFourthSet(startTime))
 						{	
 							System.out.println("Done with 4");
 							if(Util.renameTempFile(prop.getProperty("filepath"))){
@@ -78,7 +80,7 @@ public class ArgosJob implements Job {
 
 	}
 	
-	private boolean getFirstSet(){
+	private boolean getFirstSet(Date startTime){
 		try{
 			
 			RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -108,7 +110,7 @@ public class ArgosJob implements Job {
 			if(resp.getId() != null)
 			{
 				System.out.println("request1");
-				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),true);
+				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),true,startTime);
 				return true;
 			}
 			
@@ -123,7 +125,7 @@ public class ArgosJob implements Job {
 		}
 	}
 	
-	private boolean getSecondSet(){
+	private boolean getSecondSet(Date startTime){
 		try{
 			
 			RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -153,7 +155,7 @@ public class ArgosJob implements Job {
 			if(resp.getId() != null)
 			{
 				System.out.println("request2");
-				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false);
+				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false,startTime);
 				return true;
 			}
 			
@@ -168,7 +170,7 @@ public class ArgosJob implements Job {
 		}
 	}
 	
-	private boolean getThirdSet(){
+	private boolean getThirdSet(Date startTime){
 		try{
 			
 			RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -198,7 +200,7 @@ public class ArgosJob implements Job {
 			if(resp.getId() != null)
 			{
 				System.out.println("request3");
-				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false);
+				this.getData(resp.getId(),false,resp.getEstimatedWaitTime(),false,startTime);
 				return true;
 			}
 			
@@ -213,7 +215,7 @@ public class ArgosJob implements Job {
 		}
 	}
 	
-	private boolean getFourthSet(){
+	private boolean getFourthSet(Date startTime){
 		try{
 			
 			RequestConfig.Builder requestBuilder = RequestConfig.custom();
@@ -243,7 +245,7 @@ public class ArgosJob implements Job {
 			if(resp.getId() != null)
 			{
 				System.out.println("request4");
-				this.getData(resp.getId(),true,resp.getEstimatedWaitTime(),false);
+				this.getData(resp.getId(),true,resp.getEstimatedWaitTime(),false,startTime);
 				return true;
 			}
 			
@@ -263,7 +265,7 @@ public class ArgosJob implements Job {
 	
 
 	
-	private void getData(String key, Boolean end,int waitTime,Boolean start)
+	private void getData(String key, Boolean end,int waitTime,Boolean start,Date startTime)
 	{
 		try{
 		Thread.sleep(waitTime);
@@ -282,7 +284,7 @@ public class ArgosJob implements Job {
 		HttpResponse response = client.execute(getResponse);
 
 		if (response.getStatusLine().getStatusCode() == 204) {			
-			getData(key,end,waitTime,start);	
+			getData(key,end,waitTime,start,startTime);	
 			return;
 		}
 		
@@ -299,7 +301,7 @@ public class ArgosJob implements Job {
 		
 		String path = "";
 		path = prop.getProperty("filepath");
-		Util.writeToCSV(params, path,end,start);
+		Util.writeToCSV(params, path,end,start,startTime);
 		
 	}
 		catch(Exception e){

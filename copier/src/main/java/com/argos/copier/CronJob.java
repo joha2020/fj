@@ -7,9 +7,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Properties;
-
 import org.apache.commons.io.FileUtils;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -24,7 +23,9 @@ public class CronJob implements Job {
 			InputStream input = new FileInputStream("config.properties");
 			prop.load(input);
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-			String currentDate = df.format(new Date());
+			Calendar cal = Calendar.getInstance();
+	        cal.add(Calendar.DATE, -1);
+			String currentDate = df.format(cal.getTime());
 			File source = new File(prop.getProperty("filepath"));
 			File destination = new File(prop.getProperty("destinationpath")
 					+ prop.getProperty("destinationfileprefix") + currentDate

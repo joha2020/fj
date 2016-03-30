@@ -14,13 +14,12 @@ import com.argos.util.vo.Param;
 
 public class Util {
 
-	public static void writeToCSV(List<Param> params, String path, Boolean end,Boolean start) {
+	public static void writeToCSV(List<Param> params, String path, Boolean end,Boolean start,Date startTime) {
 		try {
 			SimpleDateFormat fmt = new SimpleDateFormat("dd-MM-yyyy");
-			SimpleDateFormat timefmt = new SimpleDateFormat("HH:mm:00");
-			Date now = new Date();
-			String date = fmt.format(now);
-			String timeNow = timefmt.format(now);
+			SimpleDateFormat timefmt = new SimpleDateFormat("HH:mm:00");			
+			String date = fmt.format(startTime);
+			String timeNow = timefmt.format(startTime);
 			String tempFilePath  = path+"-temp.csv";
 			File file = new File(tempFilePath);
 
@@ -36,6 +35,7 @@ public class Util {
 				writer.append(date);
 				writer.append(',');
 				writer.append(timeNow);
+				writer.append(',');
 				
 			}
 
